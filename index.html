@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matrix Timer Besturing</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #111; color: #fff; padding: 15px; max-width: 450px; margin: auto; }
+    .btn { display: block; width: 100%; margin: 12px 0; padding: 15px; font-size: 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+    .btn:active { transform: scale(0.98); }
+    .btn-blue { background: #007bff; color: #fff; }
+    .btn-red { background: #dc3545; color: #fff; }
+    .btn-green { background: #28a745; color: #fff; }
+    .btn-gray { background: #555; color: #fff; }
+    input[type="text"] { padding: 14px; width: 65%; font-size: 16px; border-radius: 8px; border: none; box-sizing: border-box; }
+    .status { font-size: 14px; color: #aaa; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+
+  <h2>Matrix Timer Besturing</h2>
+  <div id="status" class="status">Verbonden met 192.168.68.200</div>
+
+  <button class="btn btn-gray" onclick="sendCmd('/toggle')">Scherm Aan / Uit</button>
+  <button class="btn btn-blue" onclick="sendCmd('/pause')">Pauzeer / Start</button>
+  <button class="btn btn-green" onclick="sendCmd('/add')">+1 Minuut</button>
+  <button class="btn btn-red" onclick="sendCmd('/sub')">-1 Minuut</button>
+  <button class="btn btn-gray" onclick="sendCmd('/reset')">Reset naar 03:33</button>
+
+  <hr style="border: 1px solid #333; margin: 25px 0;">
+
+  <h2>Scrollende Tekst</h2>
+  <form onsubmit="sendText(event)" style="display: flex; gap: 8px;">
+    <input type="text" id="msgInput" placeholder="Typ een bericht..." style="flex: 1;" required>
+    <button type="submit" class="btn btn-green" style="width: auto; margin: 0; padding: 0 20px;">Stuur</button>
+  </form>
+  <button class="btn btn-gray" onclick="sendCmd('/timer')">Terug naar Timer</button>
+
+  <script>
+    const ESP_IP = "http://192.168.68.200";
+
+    function sendCmd(endpoint) {
+      const statusEl = document.getElementById("status");
+      statusEl.innerText = "Bezig met versturen...";
+      // no-cors zorgt dat de browser het commando altijd doorlaat naar het lokale IP
+      fetch(ESP_IP + endpoint, { mode: "no-cors" })
+        .then(() => { statusEl.innerText = "Commando verstuurd!"; })
+        .catch(() => { statusEl.innerText = "Fout: Zit je op de juiste Wi-Fi?"; });
+    }
+
+    function sendText(e) {
+      e.preventDefault();
+      const text = encodeURIComponent(document.getElementById("msgInput").value);
+      sendCmd("/msg?t=" + text);
+      document.getElementById("msgInput").value = "";
+    }
+  </script>
+</body>
+</html>
